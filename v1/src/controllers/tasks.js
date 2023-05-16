@@ -1,11 +1,13 @@
-function readAll(req, res) {
+const tasks = require('../model/db');
+
+const readAll = (req, res) => {
     if (tasks.length === 0) {
         res.json({ message: 'There are no tasks! Please add some.' });
     }
     res.json(tasks);
 }
 
-function readById(req, res) {
+const readById = (req, res) => {
     const task = tasks.find((task) => task.id === parseInt(req.params.id));
     if (!task) {
         res.status(404).json({ error: 'Task not found!' });
@@ -14,33 +16,39 @@ function readById(req, res) {
     res.json(task);
 }
 
-function create(req, res) {
-    if (!req.body.description || !req.body.done || !req.body.id) {
-        res.status(400).json({ error: 'Please provide all required fields!' });
+const create = (req, res) => {
+    if (!req.query.description || !req.query.done || !req.params.id) {
+
+        res.status(400).json({
+            error: 'Please provide all required fields!',
+            description: req.query.description,
+            done: req.query.done,
+            id: req.params.id
+        });
         return;
     }
-    if (req.body.done !== true && req.body.done !== false) {
+    if (req.query.done !== "true" && req.query.done !== "false") {
         res.status(400).json({ error: 'Please provide a valid value for done!' });
         return;
     }
-    if (tasks.find((task) => task.id === parseInt(req.body.id))) {
+    if (tasks.find((task) => task.id === parseInt(req.params.id))) {
         res.status(400).json({ error: 'Task already exists!' });
         return;
     }
-    if (typeof req.body.description !== 'string') {
+    if (typeof req.query.description !== 'string') {
         res.status(400).json({ error: 'Please provide a valid value for description!' });
         return;
     }
     const task = {
-        id: req.body.id,
-        description: req.body.description,
-        done: req.body.done,
+        id: req.params.id,
+        description: req.query.description,
+        done: req.query.done,
     };
     tasks.push(task);
     res.status(201).json({ message: 'Task created successfully!' });
 }
 
-function update(req, res) {
+const update = (req, res) => {
     if (!req.body.description || !req.body.done) {
         res.status(400).json({ error: 'Please provide all required fields!' });
         return;
@@ -58,7 +66,7 @@ function update(req, res) {
 
 }
 
-function DeleteById(req, res) {
+const DeleteById = (req, res) => {
     if (req.params.id === undefined) {
         res.status(400).json({ error: 'Please provide all required fields!' });
         return;
@@ -72,7 +80,7 @@ function DeleteById(req, res) {
     res.status(200).json({ message: 'Task deleted successfully!' });
 }
 
-function DeleteAll(req, res) {
+const DeleteAll = (req, res) => {
     while (tasks.length > 0) {
         tasks.pop();
     }
